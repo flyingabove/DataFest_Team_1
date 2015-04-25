@@ -1,0 +1,21 @@
+---
+title: "Untitled"
+author: "Xin Zhang(404214793)"
+date: "April 24, 2015"
+output: pdf_document
+---
+
+visitor <- read.csv("~/Desktop/DataFest2015/DataFest2015/visitor.csv")
+save(visitor,file="visitor.RData")
+
+configuration <- read.csv("~/Desktop/DataFest2015/DataFest2015/configuration.csv", stringsAsFactors=FALSE)
+save(configuration,file="configuration.RData")
+
+shopping <- read.csv("~/Desktop/DataFest2015/DataFest2015/shopping.csv", stringsAsFactors=FALSE)
+save(shopping,file="shopping.RData")
+
+
+leads <- read.csv("~/Desktop/DataFest2015/DataFest2015/leads.csv", stringsAsFactors=FALSE)
+save(leads,file="leads.RData")
+
+
