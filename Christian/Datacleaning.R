@@ -21,7 +21,7 @@ training_set<-shopping[Rows,]
 head(sort(table(training_set$visitor_key),decreasing=TRUE)) #Take a look!
 
 #Make Date Time variables
-training_set_mini<-training_set[1:10000,]
+training_set_mini<-training_set[1:100000,]
 training_set_mini$date<-ymd(training_set_mini$click_date)
 training_set2<-training_set_mini[-2]#remove old date
 
@@ -35,21 +35,27 @@ create_rows<-function(user_info){
   sorted_by_date<-user_info[order(user_info$date),]
   make_model<-paste(sorted_by_date$make_name,sorted_by_date$model_name,sep=",")#extract only make model
   make_model_clean<-make_model[make_model!="-1,-1"]
-  car_order<-t(make_model_clean)
+  car_order<-c(unique(user_info$visitor_key),make_model_clean)
+}
+temp<-as.data.frame(tapply(list_set,training_set2$visitor_key,print))
+
+unqiue_keys<-unique(training_set2$visitor_key)
+unique_length<-length(unqiue_keys)
+
+training_set3<-NULL
+
+for( i in 1:10){
+  
+  temp_set<-training_set2[training_set2$visitor_key==unqiue_keys[i],]
+  temp_timeseries<-create_rows(temp_set)
+  if(length(temp_timeseries)<101){
+    temp_timeseries<-c(temp_timeseries,rep(0,times=101-length(temp_timeseries)))
+  }
+  
+  training_set3<-rbind(training_set3,temp_timeseries)
 }
 
-user_info<-training_set[training_set$visitor_key==-5389273641311900672,]
-list_set<-list(training_set2)
-
-temp<-as.data.frame(tapply(training_set2$visitor_key,training_set2$visitor_key,unique))
-
-
+View(training_set3)
 table(training_set2$visitor_key)
-?tapply
 
-names(training_set2)
-
-
-
-
-
+length(list_set)
