@@ -23,7 +23,7 @@ get_ts_model<-function(unclean_ts){
   results<-as.character(sapply(clean_ts_3, get_model))
 }
 
-get_normalized_trans<-function(clean_ts){
+get_normalized_trans<-function(clean_ts,hidden_length,hidden_states){
   observation = as.character(unlist(clean_ts))
   test<-as.data.frame(expand.grid(hidden_states,hidden_states))
   part1<-as.character(unlist(test[1]))
@@ -35,14 +35,17 @@ get_normalized_trans<-function(clean_ts){
   for(i in 1:length(grid_starter)){
     
     count<-car_freq[grid_starter[i]==car_freq$total_string,]
+    if(length(count[,1])==0){
+      temp_names<-names(count)
+      count=as.data.frame(t(c(grid_starter[i],1)))
+      names(count)<-temp_names
+    }
     total_counts<-rbind(total_counts,count)
   }
-  
-  transition_matrix<-matrix(total_counts$Freq,nrow=hidden_length)
+  transition_matrix<-matrix(as.numeric(total_counts$Freq),nrow=hidden_length)
   normalize<-function(row){
     return(row/sum(row))
   }
-  
   normalize_matrix<-apply(X=transition_matrix,MARGIN = 1,FUN=normalize)
 }
 ################################################################################
@@ -51,7 +54,6 @@ get_normalized_trans<-function(clean_ts){
 total_success_rates<-NULL
 
 for(i in 1:length(training_set3[,1])){
-  print(i)
   unclean_ts<-training_set3[i,]
   
   clean_ts<-get_ts_model(unclean_ts)
@@ -59,7 +61,13 @@ for(i in 1:length(training_set3[,1])){
   
   hidden_states<-unique(clean_ts)
   hidden_length<-length(hidden_states)
-  normalize_matrix<-get_normalized_trans(clean_ts)
+  normalize_matrix<-get_normalized_trans(clean_ts,hidden_length,hidden_states)
+  if(normalize_matrix==1){
+    total_success_rates<-c(total_success_rates,1)
+    print(i)
+    print(rate)
+  }
+  else{
   hmm = initHMM(States=hidden_states,Symbols=hidden_states,
                 startProbs=matrix(rep(x=.1,times=hidden_length),nrow=hidden_length),
                 transProbs=normalize_matrix,
@@ -80,4 +88,9 @@ for(i in 1:length(training_set3[,1])){
     rate<-0
   }
   total_success_rates<-c(total_success_rates,rate)
+  print(i)
+  print(rate)
+  }
 }
+
+
